@@ -2,12 +2,12 @@
 
 #include <arduino.h>
 
-#define RightKey  0b00000001
-#define BottomKey 0b00000010
-#define TopKey    0b00000100
+#define FrontKey  0b00000001
+#define RightKey  0b00000010
+#define BackKey   0b00000100
 #define LeftKey   0b00001000
-#define BackKey  0b00010000
-#define FrontKey   0b00100000
+#define TopKey    0b00010000
+#define BottomKey 0b00100000
 
 #define KeyCount 6
 

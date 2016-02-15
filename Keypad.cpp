@@ -26,7 +26,7 @@ Keypad::Keypad(byte ploadPin, byte clockEnablePin, byte dataPin, byte clockPin) 
   _clockEnablePin = clockEnablePin;
   _dataPin = dataPin;
   _clockPin = clockPin;
-  _lastKeyPressMillis = 0;
+//  _lastKeyPressMillis = 0;
 
   pinMode(_ploadPin, OUTPUT);
   pinMode(_clockEnablePin, OUTPUT);

@@ -46,13 +46,32 @@ bool GameField::move(Direction d) {
     _wormLength--;
   }
 }
-  
+
+void setCoord(IRenderer *disp, byte l, byte r, byte c) {
+  Cell cell;
+  cell.l = l;
+  cell.r = r;
+  cell.c = c;
+  disp->set(cell, true);
+}
+
 void GameField::render(IRenderer *display) {
   display->clear();
   for (byte i = 0; i < _wormLength; i++) {
     Cell c = _worm[i];
     display->set(c, true);
   }
+//
+//  // temp
+//  setCoord(display, 0, 0, 0);
+//  setCoord(display, 0, 0, 5);
+//  setCoord(display, 0, 5, 0);
+//  setCoord(display, 0, 5, 5);
+//  setCoord(display, 5, 0, 0);
+//  setCoord(display, 5, 0, 5);
+//  setCoord(display, 5, 5, 0);
+//  setCoord(display, 5, 5, 5);  
+//  
   display->render();
 }
 

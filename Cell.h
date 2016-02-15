@@ -2,7 +2,7 @@
 
 #include <arduino.h>
 
-struct Direction { 
+typedef struct Direction { 
   byte l, r, c;
   
   Direction operator+(const Direction& d) const
@@ -17,11 +17,17 @@ struct Direction {
 
 };
 
-typedef struct Direction Direction;
+//typedef struct Direction Direction;
 
 typedef struct Cell { 
   byte l, r, c;
-  
+
+//  Cell(byte layer, byte row, byte column) {
+//    l = layer;
+//    r = row;
+//    c = column;
+//  }
+//  
   Cell operator+(const Cell& d) const
   {
     return { l + d.l, r + d.r, c + d.c };
@@ -38,7 +44,7 @@ typedef struct Cell {
   }
 };
 
-typedef struct Cell;
+//typedef struct Cell Cell;
 
 static const Direction DirectionRight = { 0, 0, 1 };
 static const Direction DirectionLeft = { 0, 0, -1 };

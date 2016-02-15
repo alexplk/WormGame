@@ -2,7 +2,8 @@
 
 #include <arduino.h>
 #include <SPI.h> 
-
+#include "Cell.h"
+#include "Keypad.h"
 
 #define ON 3
 #define HALF 2
@@ -15,7 +16,6 @@ typedef struct CellProjection {
   byte depth;
 };
 
-typedef struct Cell;
 // 2D LED matrix display. Stores brightness of all LEDs. Controls multiplexing and PWM.
 class LedMatrixDisplay { 
 private: 

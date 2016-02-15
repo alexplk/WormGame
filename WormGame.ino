@@ -5,9 +5,10 @@
 #include "LedMatrixDisplay.h"
 #include "LedMatrixRenderer.h"
 #include "Keypad.h"
+#include "SleepManager.h"
 
-#import "SegmentDisplay.h"
-
+// Diagnostics
+//#define ShowScreenAlignment 
 
 // Game field size
 #define Layers 6
@@ -20,24 +21,26 @@
 #define LedRowRegisters 1
 #define LedColumnRegisters 5 // eventually 5 (enough for 36 bits) 
 // Keypad
-#define KeypadParallelLoadPin 7
-#define KeypadClockEnablePin 6
-#define KeypadDataPin 5
-#define KeypadClockPin 4
-// Segment display
-#define SegmentDisplayClock 3
-#define SegmentDisplayData 9
-#define SegmentDisplayLatch 8
+#define KeypadParallelLoadPin 6
+#define KeypadClockEnablePin 7
+#define KeypadDataPin 4
+#define KeypadClockPin 5
+//// Segment display
+//#define SegmentDisplayClock 3
+//#define SegmentDisplayData 9
+//#define SegmentDisplayLatch 8
 
 
 LedMatrixDisplay disp(LedRows, LedColumns, LedRowRegisters, LedColumnRegisters);//, 4, 5, 6); // 6x12 leds, 1x2 8-bit shift registers; data, latch, clock on 6, 7, 8
 LedMatrixRenderer renderer(&disp, Layers, Rows, Columns);
+
 GameField field(Layers, Rows, Columns);
 Keypad keypad(KeypadParallelLoadPin, KeypadClockEnablePin, KeypadDataPin, KeypadClockPin);
+SleepManager sleep;
 
-SegmentDisplay segmentDisplay(SegmentDisplayData, SegmentDisplayLatch, SegmentDisplayClock);
+// SegmentDisplay segmentDisplay(SegmentDisplayData, SegmentDisplayLatch, SegmentDisplayClock);
 
-#define AnimationLength 74
+#define AnimationLength 80
 Direction _animation[AnimationLength] = { 
   {0, 1, 0},
   {0, 1, 0},
@@ -82,6 +85,8 @@ Direction _animation[AnimationLength] = {
   {0, -1, 0},
   {0, -1, 0},
 
+  {1, 0, 0},  {1, 0, 0},  {1, 0, 0},
+
   {0, 0, 1},
   {0, 0, 1},
   {0, 1, 0},
@@ -97,6 +102,9 @@ Direction _animation[AnimationLength] = {
   {0, 0, 1},
   {0, 1, 0},
   {0, 1, 0},
+
+  {-1, 0, 0},{-1, 0, 0},{-1, 0, 0},
+  
   {0, 1, 0},  
   {0, 1, 0},  
   {0, 1, 0},
@@ -152,18 +160,35 @@ void setup() {
   field.render(&renderer);
 }
 
+bool paused = false;
 void loop() {
 
-//  for (int i = 0; i < AnimationLength; i++) {
-//    field.move(_animation[i]);
-//    field.render(&renderer);
-//    delay(100);
-//
-//    segmentDisplay.writeNumber((int)tickCounter);
-//  }
-  
-  keypad.readShiftRegisters();
+#ifdef ShowScreenAlignment
+  renderer.renderScreenAlignment(&keypad);
+  delay(100);
+  return;
+#endif
 
+  for (int i = 0; i < AnimationLength; i++) {
+  
+    keypad.readShiftRegisters();
+    while (keypad.isPressed(RightKey)) {
+      keypad.readShiftRegisters();
+      delay(200);
+    }
+    
+    field.move(_animation[i]);
+    field.render(&renderer);
+    delay(300);
+    
+    //segmentDisplay.writeNumber((int)tickCounter);
+  }
+    
+  sleep.sleepNow();
+  
+//  if (keypad.isPressed(RightKey)) {
+//    paused = !paused;
+//  }
 //  if (keypad.isPressed(FrontKey)) {
 //    field.move(DirectionForward);
 //  }

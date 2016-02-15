@@ -17,6 +17,8 @@ public:
   void render();
   void set(Cell cell, bool fill);
 
+  void renderScreenAlignment(Keypad *keypad);
+  
 private:
   CellProjection projectToSide(Cell cell, byte side);
   

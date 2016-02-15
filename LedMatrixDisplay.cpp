@@ -29,22 +29,6 @@ void printBin(byte value) {
 }
 
 LedMatrixDisplay::LedMatrixDisplay(byte rows, byte columns, byte rowRegisters, byte columnRegisters) { ///, byte dataPin, byte latchPin, byte clockPin) {
-  
-  //Serial.begin(9600);      // open the serial port at 9600 bps:    
-  //delay(100);
-//  // Pin setup 
-//  _dataPin = dataPin;
-//  _latchPin = latchPin;
-//  _clockPin = clockPin;
-//  pinMode(_latchPin, OUTPUT);
-//  digitalWrite(_latchPin, LOW);
-//  pinMode(_clockPin, OUTPUT);
-//  pinMode(_dataPin, OUTPUT);
-////  
-////  pinMode(_latchPin-3, OUTPUT);
-////  pinMode(_clockPin-3, OUTPUT);
-////  pinMode(_dataPin-3, OUTPUT);
-
   // SPI setup 
   pinMode(SpiSlaveSelectPin, OUTPUT);
   SPI.begin();
@@ -138,17 +122,6 @@ long swget(int index) {
 
 
 void LedMatrixDisplay::render() {
-  
-//  // print rows
-//  for (int r = 0; r < _rows; r++) {
-//    for (int i = 0; i < _rowRegisters; i++) {
-//      printBin(_rawRowBits[r][i]);
-//      Serial.print(' ');
-//    }
-//    Serial.println();
-//  }
-//  Serial.println();
-  
   for (int s = 0; s < Shades - 1; s++) {
     for (int r = 0; r < _rows; r++) {
       for (int creg = _columnRegisters - 1, cc = 0; creg >= 0; creg--, cc += 8) {
@@ -163,26 +136,6 @@ void LedMatrixDisplay::render() {
       }
     }
   }
-
-//  // print columns
-//  for (int s = 0; s < Shades - 1; s++) {
-//    for (int r = 0; r < _rows; r++) {
-//      for (int i = 0; i < _rowRegisters; i++) {
-//        printBin(_rawRowBits[r][i]);
-//        Serial.print(' ');
-//      }
-//      Serial.print(' ');
-//      for (int i = 0; i < _columnRegisters; i++) {
-//        printBin(_rawColumnBits[s][r][i]);
-//        Serial.print(' ');
-//      }
-//      Serial.println();
-//    }
-//    Serial.println();
-//  }
-//
-//  Serial.println(_rows);
-//  Serial.println(_columns);
 }
 
 
@@ -218,21 +171,6 @@ void LedMatrixDisplay::renderLoop() {
 
 }
 
-//
-//void LedMatrixDisplay::set(Cell cell, bool fill) {
-//  // Current implementation can only fill cells after full clear().
-//  // fill == false will be ignored. 
-//  
-//  set(cell.r, cell.c, fill ? ON : OFF);
-//  if (!fill)
-//    return;
-//      
-//  for (byte s = 0; s < 6; s++) {
-//    CellProjection p = projectOnSide(cell, s);
-//    
-//  }
-//  
-//}
 
 
 
