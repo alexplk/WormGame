@@ -45,7 +45,11 @@ bool Keypad::readKey(byte key) {
   
 }
 
-byte Keypad::readShiftRegisters()
+void Keypad::handled() {
+  _handled = true;
+}
+
+byte Keypad::read()
 {
     long bitVal;
     byte bytesVal = 0;
@@ -62,6 +66,12 @@ byte Keypad::readShiftRegisters()
     for(int i = 0; i < DATA_WIDTH; i++)
     {
         bitVal = digitalRead(_dataPin);
+
+        if ((bitVal == _lastState) && _handled) { 
+          bitVal = 0; // nothing new read
+        } else {
+          _handled = false; 
+        }
 
         // Set the corresponding bit in bytesVal.
         bytesVal |= (bitVal << ((DATA_WIDTH-1) - i));

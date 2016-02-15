@@ -21,6 +21,7 @@ private:
   byte _dataPin;
   byte _clockPin;
   byte _lastState;
+  bool _handled;
 public: 
   // Function - SN74HC165N pin
   // pload    - pin 1   SH/LD
@@ -30,7 +31,8 @@ public:
   Keypad(byte ploadPin, byte clockEnablePin, byte dataPin, byte clockPin);
   bool isPressed(byte key);
   bool readKey(byte key);
-  byte readShiftRegisters();
+  byte read();
+  void handled();
 //private: 
   
 };

@@ -1,44 +1,73 @@
-#include "LedMatrixRenderer.h"
+#include "CubeDisplay.h"
 
 byte depthToBrightness(byte d) {
   return max(OFF, ON - d); // d == 0 -> full brightness 
 }
 
-LedMatrixRenderer::LedMatrixRenderer(LedMatrixDisplay *display, byte layers, byte rows, byte columns) {
+CubeDisplay::CubeDisplay(LedMatrixDisplay *display, byte layers, byte rows, byte columns) {
   _display = display;
   _layers = layers;
   _rows = rows;
   _columns = columns;
 }
 
+byte CubeDisplay::layers() {
+  return _layers;
+}
 
-void LedMatrixRenderer::clear() {
+byte CubeDisplay::rows() {
+  return _rows;
+}
+
+byte CubeDisplay::columns() {
+  return _columns;
+}
+
+void CubeDisplay::clear() {
   _display->clear(); 
 }
 
-void LedMatrixRenderer::render() {
+void CubeDisplay::render() {
   _display->render();
 }
 
-void LedMatrixRenderer::set(Cell cell, bool fill) {
+void CubeDisplay::set(byte l, byte r, byte c, bool fill, byte sidesMask) {
+  Cell cell;
+  cell.l = l;
+  cell.r = r;
+  cell.c = c;
+  set(cell, fill, sidesMask);
+}
+
+void CubeDisplay::set(Cell cell, bool fill, byte sidesMask) {
   // Current implementation can only fill cells after full clear().
   // fill == false will be ignored. 
-  
-  //_display->set(cell.r, cell.c, fill ? ON : OFF);
+
+  if (!isInBounds(cell))
+      return;
   
   if (!fill)
     return;
       
   for (byte s = 0; s < 6; s++) {
-    CellProjection p = projectToSide(cell, s);
-    byte b = depthToBrightness(p.depth);
-    byte prev = _display->get(p.row, p.column);
-    if (b > prev)
-      _display->set(p.row, p.column, b);
+    if (((sidesMask >> s) & 1) != 0) {
+      CellProjection p = projectToSide(cell, s);
+      byte b = depthToBrightness(p.depth);
+      byte prev = _display->get(p.row, p.column);
+      if (b > prev)
+        _display->set(p.row, p.column, b);
+    }
   }
 }
 
-CellProjection LedMatrixRenderer::projectToSide(Cell cell, byte side) {
+bool CubeDisplay::isInBounds(Cell c) {
+  return 
+    c.l >= 0 && c.l < _layers &&
+    c.r >= 0 && c.r < _rows && 
+    c.c >= 0 && c.c < _columns;
+}
+
+CellProjection CubeDisplay::projectToSide(Cell cell, byte side) {
   // See 'Display Sides.png'
   CellProjection p;
   p.depth = 100;
@@ -83,8 +112,8 @@ CellProjection LedMatrixRenderer::projectToSide(Cell cell, byte side) {
   return p;
 }
 
-void LedMatrixRenderer::renderScreenAlignment(Keypad *keypad) {
-  keypad->readShiftRegisters();
+void CubeDisplay::renderScreenAlignment(Keypad *keypad) {
+  keypad->read();
   _display->clear();
   for (int s = 0; s < 6; s++) {
     for (int i = 0; i <= s; i++) _display->set(0, i + s * 6, ON);

@@ -1,9 +1,10 @@
 #include <SPI.h>
 #include <TimerOne.h>
 
+#include "Globals.h"
 #include "GameField.h"
 #include "LedMatrixDisplay.h"
-#include "LedMatrixRenderer.h"
+#include "CubeDisplay.h"
 #include "Keypad.h"
 #include "SleepManager.h"
 
@@ -25,111 +26,23 @@
 #define KeypadClockEnablePin 7
 #define KeypadDataPin 4
 #define KeypadClockPin 5
-//// Segment display
-//#define SegmentDisplayClock 3
-//#define SegmentDisplayData 9
-//#define SegmentDisplayLatch 8
 
-
-LedMatrixDisplay disp(LedRows, LedColumns, LedRowRegisters, LedColumnRegisters);//, 4, 5, 6); // 6x12 leds, 1x2 8-bit shift registers; data, latch, clock on 6, 7, 8
-LedMatrixRenderer renderer(&disp, Layers, Rows, Columns);
-
-GameField field(Layers, Rows, Columns);
+// Globals
+LedMatrixDisplay display(LedRows, LedColumns, LedRowRegisters, LedColumnRegisters); // 6x12 leds, 1x2 8-bit shift registers; data, latch, clock on 6, 7, 8
+CubeDisplay cube(&display, Layers, Rows, Columns);
 Keypad keypad(KeypadParallelLoadPin, KeypadClockEnablePin, KeypadDataPin, KeypadClockPin);
 SleepManager sleep;
+DemoScene demoScene;
+MenuScene menuScene;
+GameScene gameScene;
+SleepScene sleepScene;
+// End globals
 
-// SegmentDisplay segmentDisplay(SegmentDisplayData, SegmentDisplayLatch, SegmentDisplayClock);
+Scene *currentScene = &menuScene;
 
-#define AnimationLength 80
-Direction _animation[AnimationLength] = { 
-  {0, 1, 0},
-  {0, 1, 0},
-  {0, 1, 0},
-  {0, 1, 0},
-  {0, 1, 0},
-  {0, 0, -1},
-  {0, 0, -1},
-  {0, 0, -1},
-  {0, 0, -1},
-  {0, 0, -1},
-  {0, -1, 0},
-  {0, -1, 0},
-  {0, -1, 0},
-  {0, -1, 0},
-  {0, 0, 1},
-  {0, 0, 1},
-  {0, 0, 1},
-  {0, 0, 1},
-  {0, 1, 0},
-  {0, 1, 0},
-  {0, 1, 0},
-  {0, 0, -1},
-  {0, 0, -1},
-  {0, 0, -1},
-  {0, -1, 0},
-  {0, -1, 0},
-  {0, -1, 0},
-  {0, 0, 1},
-  {1, 0, 0},
-  {0, 0, 1},
-  {0, 0, 1},
-
-  {1, 0, 0},
-
-  {0, 1, 0},
-  {0, 1, 0},
-  {0, 1, 0},
-  {0, 0, -1},
-  {0, 0, -1},
-  {0, 0, -1},
-  {0, -1, 0},
-  {0, -1, 0},
-
-  {1, 0, 0},  {1, 0, 0},  {1, 0, 0},
-
-  {0, 0, 1},
-  {0, 0, 1},
-  {0, 1, 0},
-  {0, 0, -1}, 
-  {0, 0, -1},
-  {0, -1, 0},
-  
-  {0, -1, 0},
-  {0, -1, 0},
-  {0, 0, 1},
-  {0, 0, 1},
-  {0, 0, 1},
-  {0, 0, 1},
-  {0, 1, 0},
-  {0, 1, 0},
-
-  {-1, 0, 0},{-1, 0, 0},{-1, 0, 0},
-  
-  {0, 1, 0},  
-  {0, 1, 0},  
-  {0, 1, 0},
-  {0, 0, -1},
-  {0, 0, -1},
-  
-  {-1, 0, 0},
-
-  {0, 0, -1},
-  {0, 0, -1},
-  {0, 0, -1},
-  {0, -1, 0},
-  {0, -1, 0},
-  {0, -1, 0},
-  {0, -1, 0},
-  {0, -1, 0},
-  {0, 0, 1},
-  {0, 0, 1},
-  {0, 0, 1},
-  {0, 0, 1},
-  {0, 0, 1},
-  
-  {-1, 0, 0},
-};
-
+#ifdef ShowScreenAlignment 
+  currentScene = new ScreenAlignmentScene();
+#endif
 
 long tickCounter = 0;
 
@@ -142,22 +55,18 @@ void mainTimer() {
     tickCounter = 10000;
     moveTimer();
   }
-  disp.renderLoop();
+  display.renderLoop();
 }
 
 void setup() {
-  //Serial.begin(9600);
-
   // Use 100 for 10kHz. At 10kHz display freq = 10kHz / 6 row / 21 phases = 80Hz
   Timer1.initialize(100);
   Timer1.attachInterrupt(mainTimer);
+  display.clear();
 
-  disp.clear();
+      
+  currentScene->activate();
 
-  field.start({ 0,0,0 });
-  for (byte i = 0; i < 5; i++)
-    field.grow(DirectionRight);
-  field.render(&renderer);
 }
 
 bool paused = false;
@@ -169,22 +78,14 @@ void loop() {
   return;
 #endif
 
-  for (int i = 0; i < AnimationLength; i++) {
-  
-    keypad.readShiftRegisters();
-    while (keypad.isPressed(RightKey)) {
-      keypad.readShiftRegisters();
-      delay(200);
-    }
-    
-    field.move(_animation[i]);
-    field.render(&renderer);
-    delay(300);
-    
-    //segmentDisplay.writeNumber((int)tickCounter);
+  Scene *transition = currentScene->loop();
+  if (transition != NULL) {
+    currentScene->deactivate();
+    currentScene = transition;
+    display.clear();
+    display.render();
+    currentScene->activate();
   }
-    
-  sleep.sleepNow();
   
 //  if (keypad.isPressed(RightKey)) {
 //    paused = !paused;
