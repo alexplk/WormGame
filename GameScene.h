@@ -7,6 +7,8 @@ class GameScene : public Scene {
 private:
   GameField *_field;
   Direction _nextDirection;
+  int _collectedTotal;
+  int _collectedSinceSpeedUp;
   
 public: 
   GameScene();

@@ -25,9 +25,12 @@ private:
   bool _isExplodingHead;
   bool _isExplodingWall;
   bool _isExplodingBody;
+  bool _isGrowingBody;
   byte _wallExplosionSide;
   Direction _wallExplosionDirection;
   byte _bodyExplosionStartSegment;
+  byte _seedCount; 
+  Cell _seed;
   
 public:
   GameField();
@@ -49,7 +52,12 @@ public:
   void explodeHead();
   void explodeWall(Direction dir);
   void explodeBody(byte segmentIndex);
+  void growBody();
   Cell getHeadCell();
+  byte seedCount(); 
+  Cell createRandomSeed();
+  void removeSeed();
+  bool isSeed(Cell c); 
   
 private: 
 
@@ -57,6 +65,6 @@ private:
   bool isSegmentVisible(byte index);
   void stopExplosion();
   void renderWallExplosion(CubeDisplay *cube);
-  
+  void renderSeeds(CubeDisplay *cube);
 };
 

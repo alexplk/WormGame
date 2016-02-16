@@ -119,9 +119,12 @@ void GameField::render(CubeDisplay *cube, byte sidesMask, bool clear) {
     cube->set(c, isSegmentVisible(i), sidesMask);
   }
 
-  // Render wall explosion 
   if (_isExplodingWall) { 
     renderWallExplosion(cube);
+  }
+
+  if (_seedCount > 0) {
+    renderSeeds(cube);
   }
   
   cube->render();
@@ -151,10 +154,16 @@ void GameField::explodeBody(byte segmentIndex) {
   _bodyExplosionStartSegment = segmentIndex;
 }
 
+void GameField::growBody() {
+  _explosionTime = millis();
+  _isGrowingBody = true;
+}
+
 void GameField::stopExplosion() {
   _isExplodingHead = false;
   _isExplodingWall = false;
   _isExplodingBody = false;
+  _isGrowingBody = false;
 }
 
 bool GameField::isSegmentVisible(byte index) {
@@ -176,9 +185,20 @@ bool GameField::isSegmentVisible(byte index) {
   if (_isExplodingBody) {
     long elapsed = millis() - _explosionTime;
     int frame = elapsed >> 7;
+    if (frame >= _wormLength) {
+      _isExplodingBody = false;
+    }
     if (index == _bodyExplosionStartSegment - frame || 
-        index == _bodyExplosionStartSegment + frame) 
-    {
+        index == _bodyExplosionStartSegment + frame) {
+      return false;
+    }
+  } else if (_isGrowingBody) {
+     long elapsed = millis() - _explosionTime;
+    int frame = elapsed >> 4;
+    if (frame >= _wormLength) {
+      _isGrowingBody = false;
+    }
+    if (index == frame) {
       return false;
     }
   }
@@ -246,3 +266,41 @@ void GameField::renderWallExplosion(CubeDisplay *cube) {
       break;
   }
 }
+
+void GameField::renderSeeds(CubeDisplay *cube) {
+  if (_seedCount == 0)
+    return;
+
+  long m = millis() >> 6;
+  if ((m & 0b11) > 0) {
+    cube->set(_seed, true);
+  }
+}
+
+byte GameField::seedCount() {
+  return _seedCount;
+}
+
+Cell GameField::createRandomSeed() {
+  // Not on the worm, and not in front of the worm.
+  // Also, try 5 times. If unsuccessfull, leave until the next move.  
+  
+  for (byte t = 0; t < 5; t++) {
+    Cell c = { random(6), random(6), random(6) };
+    if (_worm[0] + _lastDirection == c) 
+      continue;
+    if (getSegmentIndex(c) != -1)
+      continue;
+    _seedCount = 1;
+    _seed = c;
+  }
+}
+
+void GameField::removeSeed() {
+  _seedCount = 0;
+}
+
+bool GameField::isSeed(Cell c) {
+  return _seedCount == 1 && _seed == c;
+}
+

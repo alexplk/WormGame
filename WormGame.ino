@@ -44,17 +44,7 @@ Scene *currentScene = &menuScene;
   currentScene = new ScreenAlignmentScene();
 #endif
 
-long tickCounter = 0;
-
-void moveTimer() { 
-  
-}
-
 void mainTimer() {
-  if (tickCounter-- <= 0) {
-    tickCounter = 10000;
-    moveTimer();
-  }
   display.renderLoop();
 }
 
@@ -64,20 +54,10 @@ void setup() {
   Timer1.attachInterrupt(mainTimer);
   display.clear();
 
-      
   currentScene->activate();
-
 }
 
-bool paused = false;
 void loop() {
-
-#ifdef ShowScreenAlignment
-  renderer.renderScreenAlignment(&keypad);
-  delay(100);
-  return;
-#endif
-
   Scene *transition = currentScene->loop();
   if (transition != NULL) {
     currentScene->deactivate();
@@ -86,39 +66,4 @@ void loop() {
     display.render();
     currentScene->activate();
   }
-  
-//  if (keypad.isPressed(RightKey)) {
-//    paused = !paused;
-//  }
-//  if (keypad.isPressed(FrontKey)) {
-//    field.move(DirectionForward);
-//  }
-//  if (keypad.isPressed(BackKey)) {
-//    field.move(DirectionBackward);
-//  }
-//  if (keypad.isPressed(LeftKey)) {
-//    field.move(DirectionLeft);
-//  }
-//  if (keypad.isPressed(RightKey)) {
-//    field.move(DirectionRight);
-//  }
-//  if (keypad.isPressed(TopKey)) {
-//    field.move(DirectionUp);
-//  }
-//  if (keypad.isPressed(BottomKey)) {
-//    field.move(DirectionDown);
-//  }
-
-  
-//  for (int i = 0; i < 8; i++) {
-//    if ((keyBits & (1 << i)) != 0) {
-//      disp->set(0, i, ON);
-//      disp->set(i, 0, ON);
-//    }
-//  }
- 
-  //disp.renderLoop();
-  //delay(1);
-  //delayMicroseconds(10);
-  
 }

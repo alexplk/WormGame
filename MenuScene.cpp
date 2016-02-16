@@ -6,6 +6,8 @@ MenuScene::MenuScene() {
 }
 
 void MenuScene::activate() { 
+  Scene::activate();
+  
   for (int s = 0; s < 6; s++) {
     _gameFields[s].setSize(cube.layers(), cube.rows(), cube.columns());
   }
@@ -64,42 +66,41 @@ void MenuScene::deactivate() {
 }
 
 Scene *MenuScene::loop() {
-  while (true) {
-    byte key = keypad.read();
-    if (key != 0) { 
-      keypad.handled();
+  byte key = keypad.read();
+  if (key != 0) { 
+    keypad.handled();
 
-      byte side = -1;
-      for (byte s = 0; s < 6; s++) {
-        if (key == (1 << s)) {
-          side = s;
-          break;
-        }
-      }
-      if (side != -1) {
-        for (byte i = 0; i < 3; i++) {
-          _gameFields[side].render(&cube, 1 << side);
-          cube.render();
-          delay(100);
-          cube.clear();
-          cube.render();
-          delay(100);
-        }
-        for (byte i = 0; i < 3; i++) {
-          _gameFields[side].render(&cube);
-          cube.render();
-          delay(200);
-          cube.clear();
-          cube.render();
-          delay(200);
-        }
-
-        gameScene.startGame(&_gameFields[side]);
-        return &gameScene;
+    byte side = -1;
+    for (byte s = 0; s < 6; s++) {
+      if (key == (1 << s)) {
+        side = s;
+        break;
       }
     }
-    delay(20);
+    if (side != -1) {
+      for (byte i = 0; i < 3; i++) {
+        _gameFields[side].render(&cube, 1 << side);
+        cube.render();
+        delay(100);
+        cube.clear();
+        cube.render();
+        delay(100);
+      }
+      for (byte i = 0; i < 3; i++) {
+        _gameFields[side].render(&cube);
+        cube.render();
+        delay(200);
+        cube.clear();
+        cube.render();
+        delay(200);
+      }
+
+      gameScene.startGame(&_gameFields[side]);
+      return &gameScene;
+    }
   }
+  delay(10);
+  return Scene::defaultTransition();
 }
 
 
